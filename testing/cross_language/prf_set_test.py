@@ -35,8 +35,7 @@ OUTPUT_LENGTHS = [
 def all_prf_key_template_names() -> Iterable[str]:
   """Yields all PRF key template names."""
   for key_type in supported_key_types.PRF_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
 
 
 def all_prf_key_template_names_with_some_output_length():
@@ -85,10 +84,7 @@ class PrfSetPythonTest(parameterized.TestCase):
     ]
     for lang in unsupported_languages:
       p = testing_servers.prf_set(lang, keyset)
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports PRF compute with %s unexpectedly' %
-          (p.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'Language {p.lang} supports PRF compute with {key_template_name} unexpectedly'):
         p.primary().compute(b'input_data', output_length=16)
 
   @parameterized.parameters(all_prf_key_template_names())

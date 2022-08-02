@@ -62,7 +62,7 @@ def register() -> None:
       'AesCtrHmacStreamingKey',
       'AesGcmHkdfStreamingKey',
   ):
-    type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
+    type_url = f'type.googleapis.com/google.crypto.tink.{ident}'
     key_manager = core.KeyManagerCcToPyWrapper(
         tink_bindings.StreamingAeadKeyManager.from_cc_registry(type_url),
         _raw_streaming_aead.RawStreamingAead, _StreamingAeadCcToPyWrapper)

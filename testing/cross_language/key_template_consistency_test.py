@@ -27,8 +27,7 @@ from util import testing_servers
 
 def all_template_names() -> Iterable[str]:
   for names in supported_key_types.KEY_TEMPLATE_NAMES.values():
-    for name in names:
-      yield name
+    yield from names
 
 
 # These key templates are not defined in these languages.
@@ -81,16 +80,13 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
     templates = {}
     for lang in langs:
       if (template_name, lang) in UNDEFINED_TEMPLATES:
-        with self.assertRaises(
-            tink.TinkError,
-            msg=('(%s, %s) is in UNDEFINED_TEMPLATES, but does not fail.' %
-                 (template_name, lang))):
+        with self.assertRaises(tink.TinkError, msg=f'({template_name}, {lang}) is in UNDEFINED_TEMPLATES, but does not fail.'):
           testing_servers.key_template(lang, template_name)
         continue
       try:
         templates[lang] = testing_servers.key_template(lang, template_name)
       except tink.TinkError as e:
-        self.fail('(%s,%s): %s' % (lang, template_name, e))
+        self.fail(f'({lang},{template_name}): {e}')
     if len(templates) <= 1:
       # nothing to check.
       return
@@ -101,7 +97,8 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
           self,
           templates[lang],
           template,
-          msg=('templates in %s and %s are not equal:' % (langs[0], lang)))
+          msg=f'templates in {langs[0]} and {lang} are not equal:',
+      )
 
 
 if __name__ == '__main__':

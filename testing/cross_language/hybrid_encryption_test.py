@@ -101,10 +101,8 @@ _ADDITIONAL_KEY_TEMPLATES = {
 def all_hybrid_private_key_template_names() -> Iterable[str]:
   """Yields all Hybrid Encryption private key template names."""
   for key_type in supported_key_types.HYBRID_PRIVATE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
+  yield from _ADDITIONAL_KEY_TEMPLATES
 
 
 class HybridEncryptionTest(parameterized.TestCase):
@@ -156,16 +154,10 @@ class HybridEncryptionTest(parameterized.TestCase):
         output = dec.decrypt(ciphertext, context_info)
         self.assertEqual(output, plaintext)
       for dec in unsupported_decs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports hybrid decrypt with %s unexpectedly' %
-            (dec.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'Language {dec.lang} supports hybrid decrypt with {key_template_name} unexpectedly'):
           dec.decrypt(ciphertext, context_info)
     for enc in unsupported_encs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports hybrid encrypt with %s unexpectedly' % (
-              enc.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'Language {enc.lang} supports hybrid encrypt with {key_template_name} unexpectedly'):
         enc.encrypt(b'plaintext', b'context_info')
 
 

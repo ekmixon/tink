@@ -21,10 +21,7 @@ from tink import core
 
 def to_byte(c):
   # items in byte strings are of type str in Python v2.7 and int in v3.5
-  if isinstance(c, str):
-    return c.encode()
-  else:
-    return chr(c).encode()
+  return c.encode() if isinstance(c, str) else chr(c).encode()
 
 
 class CryptoFormatTest(absltest.TestCase):

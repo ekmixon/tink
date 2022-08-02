@@ -330,16 +330,17 @@ class PrfSet(prf.PrfSet):
     self._prfs = None
 
   def _initialize_key_ids(self) -> None:
-    if not self._key_ids_initialized:
-      request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=self._keyset)
-      response = self._stub.KeyIds(request)
-      if response.err:
-        raise tink.TinkError(response.err)
-      self._primary_key_id = response.output.primary_key_id
-      self._prfs = {}
-      for key_id in response.output.key_id:
-        self._prfs[key_id] = _Prf(self.lang, self._stub, self._keyset, key_id)
-      self._key_ids_initialized = True
+    if self._key_ids_initialized:
+      return
+    request = testing_api_pb2.PrfSetKeyIdsRequest(keyset=self._keyset)
+    response = self._stub.KeyIds(request)
+    if response.err:
+      raise tink.TinkError(response.err)
+    self._primary_key_id = response.output.primary_key_id
+    self._prfs = {}
+    for key_id in response.output.key_id:
+      self._prfs[key_id] = _Prf(self.lang, self._stub, self._keyset, key_id)
+    self._key_ids_initialized = True
 
   def primary_id(self) -> int:
     self._initialize_key_ids()
@@ -414,18 +415,10 @@ def proto_to_verified_jwt(
   type_header = None
   if token.HasField('type_header'):
     type_header = token.type_header.value
-  issuer = None
-  if token.HasField('issuer'):
-    issuer = token.issuer.value
-  subject = None
-  if token.HasField('subject'):
-    subject = token.subject.value
-  jwt_id = None
-  if token.HasField('jwt_id'):
-    jwt_id = token.jwt_id.value
-  audiences = None
-  if token.audiences:
-    audiences = list(token.audiences)
+  issuer = token.issuer.value if token.HasField('issuer') else None
+  subject = token.subject.value if token.HasField('subject') else None
+  jwt_id = token.jwt_id.value if token.HasField('jwt_id') else None
+  audiences = list(token.audiences) if token.audiences else None
   if token.HasField('expiration'):
     expiration = to_datetime(token.expiration.seconds, token.expiration.nanos)
     without_expiration = False

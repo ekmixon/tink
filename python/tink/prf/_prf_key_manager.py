@@ -39,7 +39,7 @@ def register() -> None:
       'HmacPrfKey',
       'HkdfPrfKey',
   ):
-    type_url = 'type.googleapis.com/google.crypto.tink.{}'.format(ident)
+    type_url = f'type.googleapis.com/google.crypto.tink.{ident}'
     key_manager = core.KeyManagerCcToPyWrapper(
         tink_bindings.PrfKeyManager.from_cc_registry(type_url),
         _prf_set.Prf, PrfCcToPyWrapper)

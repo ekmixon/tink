@@ -73,7 +73,7 @@ def _gen_keyset(
 
 def _gen_key_value(size: int) -> bytes:
   """Returns a fixed key_value of a given size."""
-  return bytes(i for i in range(size))
+  return bytes(range(size))
 
 
 def aes_eax_key_test_cases():
@@ -180,21 +180,19 @@ class AeadKeyConsistencyTest(parameterized.TestCase):
           failures += 1
           del ciphertexts[p.lang]
         if (name, p.lang) in FAILS_BUT_SHOULD_SUCCEED:
-          self.fail('(%s, %s) succeeded, but is in FAILS_BUT_SHOULD_SUCCEED' %
-                    (name, p.lang))
+          self.fail(f'({name}, {p.lang}) succeeded, but is in FAILS_BUT_SHOULD_SUCCEED')
         results[p.lang] = 'success'
       except tink.TinkError as e:
         if (name, p.lang) not in FAILS_BUT_SHOULD_SUCCEED:
           failures += 1
         if (name, p.lang) in SUCCEEDS_BUT_SHOULD_FAIL:
           self.fail(
-              '(%s, %s) is in SUCCEEDS_BUT_SHOULD_FAIL, but failed with %s' %
-              (name, p.lang, e))
+              f'({name}, {p.lang}) is in SUCCEEDS_BUT_SHOULD_FAIL, but failed with {e}'
+          )
         results[p.lang] = e
     # Test that either all supported langs accept the key, or all reject.
     if failures not in [0, len(supported_langs)]:
-      self.fail('encryption for key %s is inconsistent: %s' %
-                (name, results))
+      self.fail(f'encryption for key {name} is inconsistent: {results}')
     # Test all generated ciphertexts can be decypted.
     for enc_lang, ciphertext in ciphertexts.items():
       dec_aead = supported_aeads[0]

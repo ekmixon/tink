@@ -57,7 +57,6 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
         except core.TinkError as e:
           if isinstance(e, _jwt_error.JwtInvalidError):
             interesting_error = e
-          pass
     if interesting_error:
       raise interesting_error
     raise core.TinkError('invalid signature')
@@ -66,8 +65,7 @@ class _WrappedJwtPublicKeyVerify(_jwt_public_key_verify.JwtPublicKeyVerify):
 def _validate_primitive_set(pset: core.PrimitiveSet):
   for entries in pset.all():
     for entry in entries:
-      if (entry.output_prefix_type != tink_pb2.RAW and
-          entry.output_prefix_type != tink_pb2.TINK):
+      if entry.output_prefix_type not in [tink_pb2.RAW, tink_pb2.TINK]:
         raise core.TinkError('unsupported OutputPrefixType')
 
 

@@ -59,7 +59,7 @@ class PrimitiveSet(Generic[P]):
 
   def all(self) -> List[List[Entry]]:
     """Returns a list of copies of all lists of entries in the primitive set."""
-    return list(entries[:] for entries in self._primitives.values())
+    return [entries[:] for entries in self._primitives.values()]
 
   def primitive(self, key: tink_pb2.Keyset.Key) -> List[Entry]:
     """Returns a copy of the list of entries for a given key."""
@@ -74,8 +74,7 @@ class PrimitiveSet(Generic[P]):
     """Adds a new primitive and key entry to the set, and returns the entry."""
     if not isinstance(primitive, self._primitive_class):
       raise _tink_error.TinkError(
-          'The primitive is not an instance of {}'.format(
-              self._primitive_class))
+          f'The primitive is not an instance of {self._primitive_class}')
     identifier = _crypto_format.output_prefix(key)
 
     entry = Entry(primitive, identifier, key.status, key.output_prefix_type,

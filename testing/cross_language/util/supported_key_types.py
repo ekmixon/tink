@@ -13,6 +13,7 @@
 # limitations under the License.
 """All KeyTypes and which languages support them."""
 
+
 from typing import List
 
 from tink import aead
@@ -106,8 +107,9 @@ SUPPORTED_LANGUAGES = {
 }
 
 KEY_TYPE_FROM_URL = {
-    'type.googleapis.com/google.crypto.tink.' + key_type: key_type
-    for key_type in ALL_KEY_TYPES}
+    f'type.googleapis.com/google.crypto.tink.{key_type}': key_type
+    for key_type in ALL_KEY_TYPES
+}
 
 # For each KeyType, a list of Tinkey KeyTemplate names.
 # TODO(juerg): Add missing key template names, and remove deprecated names.

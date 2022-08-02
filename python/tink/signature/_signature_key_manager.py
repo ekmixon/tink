@@ -49,7 +49,7 @@ def register():
 
   for key_type_identifier in ('EcdsaPrivateKey', 'Ed25519PrivateKey',
                               'RsaSsaPssPrivateKey', 'RsaSsaPkcs1PrivateKey',):
-    type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
+    type_url = f'type.googleapis.com/google.crypto.tink.{key_type_identifier}'
     key_manager = core.PrivateKeyManagerCcToPyWrapper(
         tink_bindings.PublicKeySignKeyManager.from_cc_registry(type_url),
         _public_key_sign.PublicKeySign, _PublicKeySignCcToPyWrapper)
@@ -57,7 +57,7 @@ def register():
 
   for key_type_identifier in ('EcdsaPublicKey', 'Ed25519PublicKey',
                               'RsaSsaPssPublicKey', 'RsaSsaPkcs1PublicKey',):
-    type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
+    type_url = f'type.googleapis.com/google.crypto.tink.{key_type_identifier}'
     key_manager = core.KeyManagerCcToPyWrapper(
         tink_bindings.PublicKeyVerifyKeyManager.from_cc_registry(type_url),
         _public_key_verify.PublicKeyVerify, _PublicKeyVerifyCcToPyWrapper)

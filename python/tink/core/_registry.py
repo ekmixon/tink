@@ -55,7 +55,7 @@ class Registry:
     """Returns a key manager, new_key_allowed pair for the given type_url."""
     if type_url not in cls._key_managers:
       raise _tink_error.TinkError(
-          'No manager for type {} has been registered.'.format(type_url))
+          f'No manager for type {type_url} has been registered.')
     return cls._key_managers[type_url]
 
   @classmethod
@@ -88,21 +88,19 @@ class Registry:
 
     if not key_manager.does_support(type_url):
       raise _tink_error.TinkError(
-          'The manager does not support its own type {}.'.format(type_url))
+          f'The manager does not support its own type {type_url}.')
 
     if type_url in key_managers:
       existing, existing_new_key = key_managers[type_url]
-      if (type(existing) != type(key_manager) or  # pylint: disable=unidiomatic-typecheck
-          existing.primitive_class() != primitive_class):
+      if (type(existing) != type(key_manager)
+          or existing.primitive_class() != primitive_class):
         raise _tink_error.TinkError(
-            'A manager for type {} has been already registered.'.format(
-                type_url))
-      else:
-        if not existing_new_key and new_key_allowed:
-          raise _tink_error.TinkError(
-              ('A manager for type {} has been already registered '
-               'with forbidden new key operation.').format(type_url))
-        key_managers[type_url] = (existing, new_key_allowed)
+            f'A manager for type {type_url} has been already registered.')
+      if not existing_new_key and new_key_allowed:
+        raise _tink_error.TinkError(
+            f'A manager for type {type_url} has been already registered with forbidden new key operation.'
+        )
+      key_managers[type_url] = (existing, new_key_allowed)
     else:
       key_managers[type_url] = (key_manager, new_key_allowed)
 
@@ -125,9 +123,8 @@ class Registry:
     key_mgr = cls.key_manager(key_data.type_url)
     if key_mgr.primitive_class() != primitive_class:
       raise _tink_error.TinkError(
-          'Wrong primitive class: type {} uses primitive {}, and not {}.'
-          .format(key_data.type_url, key_mgr.primitive_class().__name__,
-                  primitive_class.__name__))
+          f'Wrong primitive class: type {key_data.type_url} uses primitive {key_mgr.primitive_class().__name__}, and not {primitive_class.__name__}.'
+      )
     return key_mgr.primitive(key_data)
 
   @classmethod
@@ -138,8 +135,8 @@ class Registry:
 
     if not new_key_allowed:
       raise _tink_error.TinkError(
-          'KeyManager for type {} does not allow for creation of new keys.'
-          .format(key_template.type_url))
+          f'KeyManager for type {key_template.type_url} does not allow for creation of new keys.'
+      )
 
     return key_mgr.new_key_data(key_template)
 
@@ -153,8 +150,8 @@ class Registry:
     key_mgr = cls.key_manager(private_key_data.type_url)
     if not isinstance(key_mgr, _key_manager.PrivateKeyManager):
       raise _tink_error.TinkError(
-          'manager for key type {} is not a PrivateKeyManager'
-          .format(private_key_data.type_url))
+          f'manager for key type {private_key_data.type_url} is not a PrivateKeyManager'
+      )
     return key_mgr.public_key_data(private_key_data)
 
   @classmethod
@@ -171,15 +168,14 @@ class Registry:
     if (wrapper.primitive_class() in cls._wrappers and
         type(cls._wrappers[wrapper.primitive_class()]) != type(wrapper)):  # pylint: disable=unidiomatic-typecheck
       raise _tink_error.TinkError(
-          'A wrapper for primitive {} has already been added.'.format(
-              wrapper.primitive_class().__name__))
+          f'A wrapper for primitive {wrapper.primitive_class().__name__} has already been added.'
+      )
     wrapped = wrapper.wrap(
         _primitive_set.PrimitiveSet(wrapper.input_primitive_class()))
     if not isinstance(wrapped, wrapper.primitive_class()):
       raise _tink_error.TinkError(
-          'Wrapper for primitive {} generates incompatible primitive of type {}'
-          .format(wrapper.primitive_class().__name__,
-                  type(wrapped).__name__))
+          f'Wrapper for primitive {wrapper.primitive_class().__name__} generates incompatible primitive of type {type(wrapped).__name__}'
+      )
     cls._wrappers[wrapper.primitive_class()] = wrapper
 
   @classmethod
@@ -196,8 +192,8 @@ class Registry:
     """
     if primitive_class not in cls._wrappers:
       raise _tink_error.TinkError(
-          'No PrimitiveWrapper registered for primitive {}.'
-          .format(primitive_class.__name__))
+          f'No PrimitiveWrapper registered for primitive {primitive_class.__name__}.'
+      )
     wrapper = cls._wrappers[primitive_class]
     return wrapper.input_primitive_class()
 
@@ -220,14 +216,11 @@ class Registry:
     """
     if primitive_class not in cls._wrappers:
       raise _tink_error.TinkError(
-          'No PrimitiveWrapper registered for primitive {}.'
-          .format(primitive_class.__name__))
+          f'No PrimitiveWrapper registered for primitive {primitive_class.__name__}.'
+      )
     wrapper = cls._wrappers[primitive_class]
     if primitive_set.primitive_class() != wrapper.input_primitive_class():
       raise _tink_error.TinkError(
-          'Wrapper for primitive {} wraps type {}, but the primitive_set'
-          'has type {}'
-          .format(wrapper.primitive_class().__name__,
-                  wrapper.input_primitive_class().__name__,
-                  primitive_set.primitive_class().__name__))
+          f'Wrapper for primitive {wrapper.primitive_class().__name__} wraps type {wrapper.input_primitive_class().__name__}, but the primitive_sethas type {primitive_set.primitive_class().__name__}'
+      )
     return wrapper.wrap(primitive_set)

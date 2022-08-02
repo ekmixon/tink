@@ -42,8 +42,7 @@ def tearDownModule():
 def all_signature_private_key_template_names() -> Iterable[str]:
   """Yields all Signature private key template names."""
   for key_type in supported_key_types.SIGNATURE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
 
 
 class SignatureTest(parameterized.TestCase):
@@ -84,16 +83,10 @@ class SignatureTest(parameterized.TestCase):
       for verifier in supported_verifiers:
         self.assertIsNone(verifier.verify(sign, message))
       for verifier in unsupported_verifiers:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports signature verify with %s unexpectedly' %
-            (verifier.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'Language {verifier.lang} supports signature verify with {key_template_name} unexpectedly'):
           verifier.verify(sign, message)
     for signer in unsupported_signers:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports signature sign with %s unexpectedly' %
-          (signer.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'Language {signer.lang} supports signature sign with {key_template_name} unexpectedly'):
         _ = signer.sign(message)
 
 

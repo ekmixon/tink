@@ -64,10 +64,8 @@ _ADDITIONAL_KEY_TEMPLATES = {
 def all_aead_key_template_names() -> Iterable[str]:
   """Yields all AEAD key template names."""
   for key_type in supported_key_types.AEAD_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
+  yield from _ADDITIONAL_KEY_TEMPLATES
 
 
 class AeadPythonTest(parameterized.TestCase):
@@ -107,16 +105,10 @@ class AeadPythonTest(parameterized.TestCase):
         output = p2.decrypt(ciphertext, associated_data)
         self.assertEqual(output, plaintext)
       for p2 in unsupported_aeads:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports AEAD decrypt with %s unexpectedly' %
-            (p2.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'Language {p2.lang} supports AEAD decrypt with {key_template_name} unexpectedly'):
           p2.decrypt(ciphertext, associated_data)
     for p in unsupported_aeads:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports AEAD encrypt with %s unexpectedly' % (
-              p.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'Language {p.lang} supports AEAD encrypt with {key_template_name} unexpectedly'):
         p.encrypt(b'plaintext', b'associated_data')
 
 

@@ -46,8 +46,8 @@ flags.DEFINE_string('context_info', None,
 def main(argv):
   del argv  # Unused
 
-  context_info = b'' if not FLAGS.context_info else bytes(
-      FLAGS.context_info, 'utf-8')
+  context_info = (bytes(FLAGS.context_info, 'utf-8')
+                  if FLAGS.context_info else b'')
 
   # Initialise Tink
   try:

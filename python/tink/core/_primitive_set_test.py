@@ -229,12 +229,10 @@ class PrimitiveSetTest(absltest.TestCase):
 
     list_of_entries = primitive_set.all()
 
-    v = []
-    for entries in list_of_entries:
-      v.append(
-          sorted([
-              (e.identifier, e.output_prefix_type, e.key_id) for e in entries
-          ]))
+    v = [
+        sorted([(e.identifier, e.output_prefix_type, e.key_id) for e in entries])
+        for entries in list_of_entries
+    ]
     self.assertCountEqual(v, [
         [(b'', tink_pb2.RAW, 88), (b'', tink_pb2.RAW, 89)],
         [(b'\x01\x00\x00\x00X', tink_pb2.TINK, 88),

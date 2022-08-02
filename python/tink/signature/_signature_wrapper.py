@@ -45,7 +45,7 @@ class _WrappedPublicKeySign(_public_key_sign.PublicKeySign):
 
     sign_data = data
     if primary.output_prefix_type == tink_pb2.LEGACY:
-      sign_data = sign_data + b'\x00'
+      sign_data += b'\x00'
 
     return primary.identifier + primary.primitive.sign(sign_data)
 

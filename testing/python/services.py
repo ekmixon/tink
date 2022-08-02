@@ -225,7 +225,7 @@ class KeysetServicer(testing_api_pb2_grpc.KeysetServicer):
     """Returns the key template for the given template name."""
     if request.template_name not in _KEY_TEMPLATE:
       return testing_api_pb2.KeysetTemplateResponse(
-          err='template %s not found' % request.template_name)
+          err=f'template {request.template_name} not found')
     return  testing_api_pb2.KeysetTemplateResponse(
         key_template=_KEY_TEMPLATE[request.template_name].SerializeToString())
 

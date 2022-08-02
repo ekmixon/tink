@@ -46,8 +46,8 @@ flags.DEFINE_string('associated_data', None,
 def main(argv):
   del argv  # Unused.
 
-  associated_data = b'' if not FLAGS.associated_data else bytes(
-      FLAGS.associated_data, 'utf-8')
+  associated_data = (bytes(FLAGS.associated_data, 'utf-8')
+                     if FLAGS.associated_data else b'')
 
   # Initialise Tink
   try:

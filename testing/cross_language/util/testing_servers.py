@@ -90,16 +90,15 @@ def _server_path(lang: str) -> str:
     logging.info('try path: %s', server_path)
     if os.path.exists(server_path):
       return server_path
-  raise RuntimeError('Executable for lang %s not found' % lang)
+  raise RuntimeError(f'Executable for lang {lang} not found')
 
 
 def _server_cmd(lang: str, port: int) -> List[str]:
   server_path = _server_path(lang)
-  if lang == 'java' and server_path.endswith('.jar'):
-    java_path = os.path.join(helper.tink_root_path(), _JAVA_PATH)
-    return [java_path, '-jar', server_path, '--port', '%d' % port]
-  else:
+  if lang != 'java' or not server_path.endswith('.jar'):
     return [server_path, '--port', '%d' % port]
+  java_path = os.path.join(helper.tink_root_path(), _JAVA_PATH)
+  return [java_path, '-jar', server_path, '--port', '%d' % port]
 
 
 class _TestingServers():
@@ -129,14 +128,14 @@ class _TestingServers():
         raise RuntimeError(
             'Could not start %s server, TEST_UNDECLARED_OUTPUTS_DIR environment'
             'variable must be set')
-      output_file = '%s-%s-%s' % (test_name, lang, 'server.log')
+      output_file = f'{test_name}-{lang}-server.log'
       output_path = os.path.join(output_dir, output_file)
       logging.info('writing server output to %s', output_path)
       try:
         self._output_file[lang] = open(output_path, 'w+')
       except IOError:
         logging.info('unable to open server output file %s', output_path)
-        raise RuntimeError('Could not start %s server' % lang)
+        raise RuntimeError(f'Could not start {lang} server')
       self._server[lang] = subprocess.Popen(
           cmd, stdout=self._output_file[lang], stderr=subprocess.STDOUT)
       logging.info('%s server started on port %d with pid: %d.',
@@ -150,15 +149,14 @@ class _TestingServers():
         logging.info('Timeout while connecting to server %s', lang)
         self._server[lang].kill()
         out, err = self._server[lang].communicate()
-        raise RuntimeError(
-            'Could not start %s server, output=%s, err=%s' % (lang, out, err))
+        raise RuntimeError(f'Could not start {lang} server, output={out}, err={err}')
       self._metadata_stub[lang] = testing_api_pb2_grpc.MetadataStub(
           self._channel[lang])
       self._keyset_stub[lang] = testing_api_pb2_grpc.KeysetStub(
           self._channel[lang])
     for primitive in _PRIMITIVES:
       for lang in SUPPORTED_LANGUAGES_BY_PRIMITIVE[primitive]:
-        stub_name = '_%s_stub' % primitive
+        stub_name = f'_{primitive}_stub'
         getattr(self, stub_name)[lang] = _PRIMITIVE_STUBS[primitive](
             self._channel[lang])
 
@@ -222,8 +220,7 @@ def start(output_files_prefix: str) -> None:
     response = _ts.metadata_stub(lang).GetServerInfo(
         testing_api_pb2.ServerInfoRequest())
     if lang != response.language:
-      raise ValueError(
-          'lang = %s != response.language = %s' % (lang, response.language))
+      raise ValueError(f'lang = {lang} != response.language = {response.language}')
     if response.tink_version:
       versions[lang] = response.tink_version
     else:
@@ -232,8 +229,8 @@ def start(output_files_prefix: str) -> None:
   if not unique_versions:
     raise ValueError('tink version unknown')
   if len(unique_versions) > 1:
-    raise ValueError('tink_version in testing servers are inconsistent: %s' %
-                     versions)
+    raise ValueError(
+        f'tink_version in testing servers are inconsistent: {versions}')
   logging.info('Tink version: %s', unique_versions[0])
 
 

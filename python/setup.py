@@ -40,8 +40,7 @@ def _get_tink_version():
       version_line = next(
           line for line in f if line.startswith('TINK_VERSION_LABEL'))
     except StopIteration:
-      raise ValueError(
-          'Version not defined in {}/VERSION'.format(_PROJECT_BASE_DIR))
+      raise ValueError(f'Version not defined in {_PROJECT_BASE_DIR}/VERSION')
     else:
       return version_line.split(' = ')[-1].strip('\n \'"')
 
@@ -61,19 +60,16 @@ def _get_bazel_command():
 
 def _get_protoc_command():
   """Finds the protoc command."""
-  if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC']):
-    return os.environ['PROTOC']
-  else:
-    return spawn.find_executable('protoc')
-  raise FileNotFoundError('Could not find protoc executable. Please install '
-                          'protoc to compile the Tink Python package.')
+  return (os.environ['PROTOC']
+          if 'PROTOC' in os.environ and os.path.exists(os.environ['PROTOC'])
+          else spawn.find_executable('protoc'))
 
 
 def _generate_proto(protoc, source):
   """Invokes the Protocol Compiler to generate a _pb2.py."""
 
   if not os.path.exists(source):
-    raise FileNotFoundError('Cannot find required file: {}'.format(source))
+    raise FileNotFoundError(f'Cannot find required file: {source}')
 
   output = source.replace('.proto', '_pb2.py')
 
@@ -82,7 +78,7 @@ def _generate_proto(protoc, source):
     # No need to regenerate if output is newer than source.
     return
 
-  print('Generating {}...'.format(output))
+  print(f'Generating {output}...')
   protoc_args = [protoc, '-I.', '--python_out=.', source]
   subprocess.run(args=protoc_args, check=True)
 
@@ -129,8 +125,8 @@ def _patch_workspace(workspace_content):
     return _patch_with_local_path(workspace_content, base_path)
 
   if 'TINK_PYTHON_SETUPTOOLS_TAGGED_VERSION' in os.environ:
-    archive_filename = 'v{}.zip'.format(_TINK_VERSION)
-    archive_prefix = 'tink-{}'.format(_TINK_VERSION)
+    archive_filename = f'v{_TINK_VERSION}.zip'
+    archive_prefix = f'tink-{_TINK_VERSION}'
     return _patch_with_http_archive(workspace_content,
                                     archive_filename, archive_prefix)
 
@@ -250,7 +246,7 @@ class BuildBazelExtension(build_ext.build_ext):
     ]
     self.spawn(bazel_argv)
     ext_bazel_bin_path = os.path.join('bazel-bin', ext.relpath,
-                                      ext.target_name + '.so')
+                                      f'{ext.target_name}.so')
     ext_dest_path = self.get_ext_fullpath(ext.name)
     ext_dest_dir = os.path.dirname(ext_dest_path)
     if not os.path.exists(ext_dest_dir):

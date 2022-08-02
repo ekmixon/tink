@@ -81,7 +81,7 @@ class DummyPrivateKeyManager(core.PrivateKeyManager[hybrid.HybridDecrypt]):
 
   def public_key_data(
       self, private_key_data: tink_pb2.KeyData) -> tink_pb2.KeyData:
-    return tink_pb2.KeyData(type_url='public_' + private_key_data.type_url)
+    return tink_pb2.KeyData(type_url=f'public_{private_key_data.type_url}')
 
 
 class DummyMacWrapper(core.PrimitiveWrapper[mac.Mac, mac.Mac]):

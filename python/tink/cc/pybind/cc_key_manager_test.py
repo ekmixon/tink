@@ -373,11 +373,8 @@ class PublicKeySignVerifyKeyManagerTest(absltest.TestCase):
         hash_type=hash_type, curve=curve_type, encoding=encoding)
     key_format = ecdsa_pb2.EcdsaKeyFormat(params=params)
     key_template = tink_pb2.KeyTemplate()
-    if public:
-      append = 'EcdsaPublicKey'
-    else:
-      append = 'EcdsaPrivateKey'
-    key_template.type_url = 'type.googleapis.com/google.crypto.tink.' + append
+    append = 'EcdsaPublicKey' if public else 'EcdsaPrivateKey'
+    key_template.type_url = f'type.googleapis.com/google.crypto.tink.{append}'
 
     key_template.value = key_format.SerializeToString()
     return key_template.SerializeToString()

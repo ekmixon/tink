@@ -38,7 +38,7 @@ class GcpKmsClientTest(absltest.TestCase):
 
   def test_client_invalid_path(self):
     with self.assertRaises(ValueError):
-      gcpkms.GcpKmsClient('', CREDENTIAL_PATH + 'corrupted')
+      gcpkms.GcpKmsClient('', f'{CREDENTIAL_PATH}corrupted')
 
   def test_client_not_bound(self):
     gcp_key1 = 'gcp-kms://projects/someProject/.../cryptoKeys/key1'

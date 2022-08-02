@@ -85,7 +85,5 @@ class GcpKmsAeadTest(absltest.TestCase):
       with self.assertRaises(core.TinkError):
         aead.decrypt(corrupted_ciphertext, b'')
 
-if __name__ == '__main__':
-  # TODO(b/154273145): re-enable this.
-  pass
+pass
   # absltest.main()

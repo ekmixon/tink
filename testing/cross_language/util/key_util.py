@@ -168,7 +168,8 @@ def _text_format_field(value: Any,
   if field.type == TYPE_MESSAGE:
     output = [
         indent + field.name + ' {',
-        _text_format_message(value, indent + '  ', remove_value), indent + '}'
+        _text_format_message(value, f'{indent}  ', remove_value),
+        indent + '}',
     ]
     return '\n'.join(output)
   elif field.type == TYPE_ENUM:
@@ -214,11 +215,12 @@ def _text_format_message(msg: message.Message, indent: str,
           proto_type = KeyProto.from_url(type_url)
         # parse 'value' and text format the content in a comment.
         field_proto = proto_type.FromString(value)
-        output.append(indent + '# value: [' + TYPE_PREFIX +
-                      proto_type.DESCRIPTOR.full_name + '] {')
-        output.append(
-            _text_format_message(field_proto, indent + '#   ', remove_value))
-        output.append(indent + '# }')
+        output.extend((
+            ((f'{indent}# value: [{TYPE_PREFIX}' +
+              proto_type.DESCRIPTOR.full_name) + '] {'),
+            _text_format_message(field_proto, f'{indent}#   ', remove_value),
+            indent + '# }',
+        ))
         if remove_value:
           output.append(
               _text_format_field('<removed>', fields[1], indent, remove_value))
@@ -228,8 +230,9 @@ def _text_format_message(msg: message.Message, indent: str,
     fields = fields[2:]
   for field in fields:
     if field.label == LABEL_REPEATED:
-      for value in getattr(msg, field.name):
-        output.append(_text_format_field(value, field, indent, remove_value))
+      output.extend(
+          _text_format_field(value, field, indent, remove_value)
+          for value in getattr(msg, field.name))
     else:
       output.append(
           _text_format_field(

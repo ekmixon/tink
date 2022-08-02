@@ -54,10 +54,8 @@ _ADDITIONAL_KEY_TEMPLATES = {
 
 def mac_key_template_names() -> Iterable[str]:
   for key_type in supported_key_types.MAC_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
-  for key_template_name in _ADDITIONAL_KEY_TEMPLATES:
-    yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
+  yield from _ADDITIONAL_KEY_TEMPLATES
 
 
 class MacTest(parameterized.TestCase):
@@ -93,16 +91,10 @@ class MacTest(parameterized.TestCase):
       for p2 in supported_macs:
         self.assertIsNone(p2.verify_mac(mac_value, data))
       for p2 in unsupported_macs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='Language %s supports verify_mac with %s unexpectedly' %
-            (p2.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'Language {p2.lang} supports verify_mac with {key_template_name} unexpectedly'):
           p2.verify_mac(mac_value, data)
     for p in unsupported_macs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='Language %s supports compute_mac with %s unexpectedly' %
-          (p.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'Language {p.lang} supports compute_mac with {key_template_name} unexpectedly'):
         p.compute_mac(data)
 
 

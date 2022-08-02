@@ -38,7 +38,7 @@ def register():
   tink_bindings.register()
 
   for key_type_identifier in ('HmacKey', 'AesCmacKey',):
-    type_url = 'type.googleapis.com/google.crypto.tink.' + key_type_identifier
+    type_url = f'type.googleapis.com/google.crypto.tink.{key_type_identifier}'
     key_manager = core.KeyManagerCcToPyWrapper(
         tink_bindings.MacKeyManager.from_cc_registry(type_url), _mac.Mac,
         _MacCcToPyWrapper)

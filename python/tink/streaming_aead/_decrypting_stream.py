@@ -95,8 +95,7 @@ class RawDecryptingStream(io.RawIOBase):
       # non-blocking mode, but according to https://bugs.python.org/issue13322
       # that mode is not properly implemented and not really used.
       while True:
-        data = self._read_from_input_stream_adapter(size)
-        if data:
+        if data := self._read_from_input_stream_adapter(size):
           return data
     except core.TinkError as e:
       # We are checking if the exception was raised because of C++

@@ -65,7 +65,7 @@ class KmsEnvelopeAead(_aead.Aead):
     if ct_len < self.DEK_LEN_BYTES:
       raise core.TinkError
 
-    dek_len = struct.unpack('>I', ciphertext[0:self.DEK_LEN_BYTES])[0]
+    dek_len = struct.unpack('>I', ciphertext[:self.DEK_LEN_BYTES])[0]
 
     # Basic check if DEK length can be valid.
     if dek_len > (ct_len - self.DEK_LEN_BYTES) or dek_len < 0:

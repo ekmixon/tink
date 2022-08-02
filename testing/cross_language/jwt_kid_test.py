@@ -94,8 +94,7 @@ def generate_jwt_signature_keyset_with_custom_kid(
   else:
     raise ValueError('unknown template name')
   keyset_handle._keyset.key[0].key_data.value = key_data_value
-  keyset = keyset_handle._keyset
-  return keyset
+  return keyset_handle._keyset
 
 
 class JwtKidTest(parameterized.TestCase):

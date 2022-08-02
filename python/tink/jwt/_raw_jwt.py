@@ -42,7 +42,7 @@ def _to_datetime(timestamp: float) -> datetime.datetime:
 def _validate_custom_claim_name(name: str) -> None:
   if name in _REGISTERED_NAMES:
     raise _jwt_error.JwtInvalidError(
-        'registered name %s cannot be custom claim name' % name)
+        f'registered name {name} cannot be custom claim name')
 
 
 class RawJwt:
@@ -75,18 +75,16 @@ class RawJwt:
     self._validate_audience_claim()
 
   def _validate_string_claim(self, name: str):
-    if name in self._payload:
-      if not isinstance(self._payload[name], str):
-        raise _jwt_error.JwtInvalidError('claim %s must be a String' % name)
+    if name in self._payload and not isinstance(self._payload[name], str):
+      raise _jwt_error.JwtInvalidError(f'claim {name} must be a String')
 
   def _validate_timestamp_claim(self, name: str):
     if name in self._payload:
       timestamp = self._payload[name]
       if not isinstance(timestamp, (int, float)):
-        raise _jwt_error.JwtInvalidError('claim %s must be a Number' % name)
+        raise _jwt_error.JwtInvalidError(f'claim {name} must be a Number')
       if timestamp > _MAX_TIMESTAMP_VALUE or timestamp < 0:
-        raise _jwt_error.JwtInvalidError(
-            'timestamp of claim %s is out of range' % name)
+        raise _jwt_error.JwtInvalidError(f'timestamp of claim {name} is out of range')
 
   def _validate_audience_claim(self):
     if 'aud' in self._payload:
@@ -156,10 +154,7 @@ class RawJwt:
   def custom_claim(self, name: str) -> Claim:
     _validate_custom_claim_name(name)
     value = self._payload[name]
-    if isinstance(value, (list, dict)):
-      return copy.deepcopy(value)
-    else:
-      return value
+    return copy.deepcopy(value) if isinstance(value, (list, dict)) else value
 
   def json_payload(self) -> str:
     """Returns the payload encoded as JSON string."""
@@ -211,7 +206,7 @@ class RawJwt:
         elif isinstance(value, dict):
           payload[name] = json.loads(json.dumps(value))
         else:
-          raise _jwt_error.JwtInvalidError('claim %s has unknown type' % name)
+          raise _jwt_error.JwtInvalidError(f'claim {name} has unknown type')
     raw_jwt = object.__new__(cls)
     raw_jwt.__init__(type_header, payload)
     return raw_jwt

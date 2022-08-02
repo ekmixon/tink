@@ -89,8 +89,7 @@ class RawEncryptingStream(io.RawIOBase):
       raise ValueError('write on closed file')
 
     if not isinstance(b, (bytes, memoryview, bytearray)):
-      raise TypeError('a bytes-like object is required, not {}'.format(
-          type(b).__name__))
+      raise TypeError(f'a bytes-like object is required, not {type(b).__name__}')
     written = self._write_to_cc_encrypting_stream(b)
     if written < 0 or written > len(b):
       raise core.TinkError('Incorrect number of bytes written')

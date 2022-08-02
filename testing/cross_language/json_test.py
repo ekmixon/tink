@@ -53,8 +53,7 @@ def _is_equal_keyset(keyset1: bytes, keyset2: bytes) -> bool:
 def all_key_template_names() -> Iterable[str]:
   """Yields all key template names."""
   for key_type in supported_key_types.ALL_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
 
 
 class JsonTest(parameterized.TestCase):

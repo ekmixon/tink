@@ -162,52 +162,49 @@ def validate(validator: JwtValidator, raw_jwt: _raw_jwt.RawJwt) -> None:
     raise _jwt_error.JwtInvalidError('token is missing an expiration')
   if (raw_jwt.has_expiration() and
       raw_jwt.expiration() <= now - validator.clock_skew()):
-    raise _jwt_error.JwtInvalidError('token has expired since %s' %
-                                     raw_jwt.expiration())
+    raise _jwt_error.JwtInvalidError(
+        f'token has expired since {raw_jwt.expiration()}')
   if (raw_jwt.has_not_before() and
       raw_jwt.not_before() > now + validator.clock_skew()):
-    raise _jwt_error.JwtInvalidError('token cannot be used before %s' %
-                                     raw_jwt.not_before())
+    raise _jwt_error.JwtInvalidError(
+        f'token cannot be used before {raw_jwt.not_before()}')
   if validator.expect_issued_in_the_past():
     if not raw_jwt.has_issued_at():
       raise _jwt_error.JwtInvalidError('token is missing iat claim')
     if raw_jwt.issued_at() > now + validator.clock_skew():
       raise _jwt_error.JwtInvalidError(
-          'token has a invalid iat claim in the future: %s' %
-          raw_jwt.issued_at())
+          f'token has a invalid iat claim in the future: {raw_jwt.issued_at()}'
+      )
   if validator.has_expected_type_header():
     if not raw_jwt.has_type_header():
       raise _jwt_error.JwtInvalidError(
-          'invalid JWT; missing expected type header %s.' %
-          validator.expected_type_header())
+          f'invalid JWT; missing expected type header {validator.expected_type_header()}.'
+      )
     if validator.expected_type_header() != raw_jwt.type_header():
       raise _jwt_error.JwtInvalidError(
-          'invalid JWT; expected type header %s, but got %s' %
-          (validator.expected_type_header(), raw_jwt.type_header()))
-  else:
-    if raw_jwt.has_type_header() and not validator.ignore_type_header():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; token has type_header set, but validator not.')
+          f'invalid JWT; expected type header {validator.expected_type_header()}, but got {raw_jwt.type_header()}'
+      )
+  elif raw_jwt.has_type_header() and not validator.ignore_type_header():
+    raise _jwt_error.JwtInvalidError(
+        'invalid JWT; token has type_header set, but validator not.')
   if validator.has_expected_issuer():
     if not raw_jwt.has_issuer():
       raise _jwt_error.JwtInvalidError(
-          'invalid JWT; missing expected issuer %s.' %
-          validator.expected_issuer())
+          f'invalid JWT; missing expected issuer {validator.expected_issuer()}.'
+      )
     if validator.expected_issuer() != raw_jwt.issuer():
       raise _jwt_error.JwtInvalidError(
-          'invalid JWT; expected issuer %s, but got %s' %
-          (validator.expected_issuer(), raw_jwt.issuer()))
-  else:
-    if raw_jwt.has_issuer() and not validator.ignore_issuer():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; token has issuer set, but validator not.')
+          f'invalid JWT; expected issuer {validator.expected_issuer()}, but got {raw_jwt.issuer()}'
+      )
+  elif raw_jwt.has_issuer() and not validator.ignore_issuer():
+    raise _jwt_error.JwtInvalidError(
+        'invalid JWT; token has issuer set, but validator not.')
   if validator.has_expected_audience():
     if (not raw_jwt.has_audiences() or
         validator.expected_audience() not in raw_jwt.audiences()):
       raise _jwt_error.JwtInvalidError(
-          'invalid JWT; missing expected audience %s.' %
-          validator.expected_audience())
-  else:
-    if raw_jwt.has_audiences() and not validator.ignore_audiences():
-      raise _jwt_error.JwtInvalidError(
-          'invalid JWT; token has audience set, but validator not.')
+          f'invalid JWT; missing expected audience {validator.expected_audience()}.'
+      )
+  elif raw_jwt.has_audiences() and not validator.ignore_audiences():
+    raise _jwt_error.JwtInvalidError(
+        'invalid JWT; token has audience set, but validator not.')

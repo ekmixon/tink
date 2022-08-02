@@ -80,7 +80,7 @@ def raw_jwt_from_proto(proto_raw_jwt: testing_api_pb2.JwtToken) -> jwt.RawJwt:
     elif claim.HasField('json_array_value'):
       custom_claims[name] = json.loads(claim.json_array_value)
     else:
-      raise ValueError('claim %s has unknown type' % name)
+      raise ValueError(f'claim {name} has unknown type')
   expiration = None
   if proto_raw_jwt.HasField('expiration'):
     expiration = _from_timestamp_proto(proto_raw_jwt.expiration)
@@ -145,7 +145,7 @@ def verifiedjwt_to_proto(
     elif isinstance(value, list):
       token.custom_claims[name].json_array_value = json.dumps(value)
     else:
-      raise ValueError('claim %s has unknown type' % name)
+      raise ValueError(f'claim {name} has unknown type')
   return token
 
 

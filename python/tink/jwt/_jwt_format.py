@@ -13,6 +13,7 @@
 # limitations under the License.
 """Functions that help to serialize and deserialize from/to the JWT format."""
 
+
 import base64
 import binascii
 import struct
@@ -24,8 +25,18 @@ from tink.jwt import _jwt_error
 from tink.jwt import _raw_jwt
 
 _VALID_ALGORITHMS = frozenset({
-    'HS256', 'HS384', 'HS512', 'ES256', 'ES384', 'ES512', 'RS256', 'RS384',
-    'RS384', 'RS512', 'PS256', 'PS384', 'PS512'
+    'HS256',
+    'HS384',
+    'HS512',
+    'ES256',
+    'ES384',
+    'ES512',
+    'RS256',
+    'RS384',
+    'RS512',
+    'PS256',
+    'PS384',
+    'PS512',
 })
 
 
@@ -39,11 +50,7 @@ def _is_valid_urlsafe_base64_char(c: int) -> bool:
     return True
   if c >= ord('A') and c <= ord('Z'):
     return True
-  if c >= ord('0') and c <= ord('9'):
-    return True
-  if c == ord('-') or c == ord('_'):
-    return True
-  return False
+  return True if c >= ord('0') and c <= ord('9') else c in [ord('-'), ord('_')]
 
 
 def base64_decode(encoded_data: bytes) -> bytes:
@@ -64,7 +71,7 @@ def base64_decode(encoded_data: bytes) -> bytes:
 
 def _validate_algorithm(algorithm: str) -> None:
   if algorithm not in _VALID_ALGORITHMS:
-    raise _jwt_error.JwtInvalidError('Invalid algorithm %s' % algorithm)
+    raise _jwt_error.JwtInvalidError(f'Invalid algorithm {algorithm}')
 
 
 def encode_header(json_header: str) -> bytes:
@@ -175,8 +182,8 @@ def validate_header(header: Any,
   _validate_algorithm(algorithm)
   hdr_algorithm = header.get('alg', '')
   if hdr_algorithm.upper() != algorithm:
-    raise _jwt_error.JwtInvalidError('Invalid algorithm; expected %s, got %s' %
-                                     (algorithm, hdr_algorithm))
+    raise _jwt_error.JwtInvalidError(
+        f'Invalid algorithm; expected {algorithm}, got {hdr_algorithm}')
   if 'crit' in header:
     raise _jwt_error.JwtInvalidError(
         'all tokens with crit headers are rejected')

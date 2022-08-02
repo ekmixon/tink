@@ -38,10 +38,10 @@ def tink_root_path() -> str:
   if 'TINK_SRC_PATH' in os.environ:
     root_paths.append(os.environ['TINK_SRC_PATH'])
   if 'TEST_SRCDIR' in os.environ:
-    # Bazel enviroment
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'))
-    root_paths.append(os.path.join(os.environ['TEST_SRCDIR'],
-                                   'google3/third_party/tink'))
+    root_paths.extend((
+        os.path.join(os.environ['TEST_SRCDIR'], 'tink_base'),
+        os.path.join(os.environ['TEST_SRCDIR'], 'google3/third_party/tink'),
+    ))
   for root_path in root_paths:
     # return the first root path that exists.
     if os.path.exists(root_path):
@@ -81,7 +81,7 @@ class FakeMac(mac.Mac):
 
   def verify_mac(self, mac_value: bytes, data: bytes) -> None:
     if mac_value != data + b'|' + self._name.encode():
-      raise core.TinkError('invalid mac ' + mac_value.decode())
+      raise core.TinkError(f'invalid mac {mac_value.decode()}')
 
 
 class FakeAead(aead.Aead):
@@ -167,7 +167,7 @@ class FakePublicKeyVerify(pk_signature.PublicKeyVerify):
 
   def verify(self, signature: bytes, data: bytes):
     if signature != data + b'|' + self._name.encode():
-      raise core.TinkError('invalid signature ' + signature.decode())
+      raise core.TinkError(f'invalid signature {signature.decode()}')
 
 
 class FakePrf(prf.Prf):

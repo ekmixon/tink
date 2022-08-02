@@ -83,19 +83,19 @@ class JwtSignatureKeyManagerTest(parameterized.TestCase):
 
     # invalid format
     with self.assertRaises(tink.TinkError):
-      verify.verify_and_decode(signed_compact + '.123', validator)
+      verify.verify_and_decode(f'{signed_compact}.123', validator)
 
     # invalid character
     with self.assertRaises(tink.TinkError):
-      verify.verify_and_decode(signed_compact + '?', validator)
+      verify.verify_and_decode(f'{signed_compact}?', validator)
 
     # modified signature
     with self.assertRaises(tink.TinkError):
-      verify.verify_and_decode(signed_compact + 'a', validator)
+      verify.verify_and_decode(f'{signed_compact}a', validator)
 
     # modified header
     with self.assertRaises(tink.TinkError):
-      verify.verify_and_decode('a' + signed_compact, validator)
+      verify.verify_and_decode(f'a{signed_compact}', validator)
 
   def test_create_sign_verify_with_type_header(self):
     handle = tink.new_keyset_handle(jwt.jwt_es256_template())

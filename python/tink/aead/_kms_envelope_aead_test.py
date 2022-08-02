@@ -94,13 +94,13 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
     plaintext = b'helloworld'
     ciphertext = bytearray(env_aead.encrypt(plaintext, b'some ad'))
-    ciphertext[0:3] = [0xff, 0xff, 0xff, 0xff]
+    ciphertext[:3] = [0xff, 0xff, 0xff, 0xff]
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
       plaintext = env_aead.decrypt(corrupted_ciphertext, b'some ad')
 
-    ciphertext[0:3] = [0, 0, 0, 0]
+    ciphertext[:3] = [0, 0, 0, 0]
     corrupted_ciphertext = bytes(ciphertext)
 
     with self.assertRaises(core.TinkError):
@@ -117,7 +117,7 @@ class KmsEnvelopeAeadTest(absltest.TestCase):
 
     # Decrypt DEK
     dek_len = struct.unpack('>I',
-                            ciphertext[0:aead.KmsEnvelopeAead.DEK_LEN_BYTES])[0]
+                            ciphertext[:aead.KmsEnvelopeAead.DEK_LEN_BYTES])[0]
     encrypted_dek_bytes = bytes(ciphertext[
         aead.KmsEnvelopeAead.DEK_LEN_BYTES:aead.KmsEnvelopeAead.DEK_LEN_BYTES +
         dek_len])

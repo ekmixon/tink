@@ -202,26 +202,23 @@ def aes_siv_test_cases() -> TestCasesType:
 
 
 def ecies_aead_hkdf_test_cases() -> TestCasesType:
-  for curve_type in CURVE_TYPES:
-    for hash_type in HASH_TYPES:
-      ec_point_format = common_pb2.UNCOMPRESSED
-      dem_key_template = aead.aead_key_templates.AES128_GCM
-      yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesGcmKey(16))' %
-             (common_pb2.EllipticCurveType.Name(curve_type),
-              common_pb2.EcPointFormat.Name(ec_point_format),
-              common_pb2.HashType.Name(hash_type)),
-             hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-                 curve_type, ec_point_format, hash_type, dem_key_template))
+  for curve_type, hash_type in itertools.product(CURVE_TYPES, HASH_TYPES):
+    ec_point_format = common_pb2.UNCOMPRESSED
+    dem_key_template = aead.aead_key_templates.AES128_GCM
+    yield (
+        f'EciesAeadHkdfPrivateKey({common_pb2.EllipticCurveType.Name(curve_type)},{common_pb2.EcPointFormat.Name(ec_point_format)},{common_pb2.HashType.Name(hash_type)},AesGcmKey(16))',
+        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+            curve_type, ec_point_format, hash_type, dem_key_template),
+    )
   for ec_point_format in EC_POINT_FORMATS:
     curve_type = common_pb2.NIST_P256
     hash_type = common_pb2.SHA256
     dem_key_template = aead.aead_key_templates.AES128_GCM
-    yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesGcmKey(16))' %
-           (common_pb2.EllipticCurveType.Name(curve_type),
-            common_pb2.EcPointFormat.Name(ec_point_format),
-            common_pb2.HashType.Name(hash_type)),
-           hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-               curve_type, ec_point_format, hash_type, dem_key_template))
+    yield (
+        f'EciesAeadHkdfPrivateKey({common_pb2.EllipticCurveType.Name(curve_type)},{common_pb2.EcPointFormat.Name(ec_point_format)},{common_pb2.HashType.Name(hash_type)},AesGcmKey(16))',
+        hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+            curve_type, ec_point_format, hash_type, dem_key_template),
+    )
   curve_type = common_pb2.NIST_P256
   ec_point_format = common_pb2.UNCOMPRESSED
   hash_type = common_pb2.SHA256
@@ -229,24 +226,20 @@ def ecies_aead_hkdf_test_cases() -> TestCasesType:
   # TODO(juerg): Once b/160130470 is fixed, increase test coverage to all
   # aead templates.
   dem_key_template = aead.aead_key_templates.create_aes_eax_key_template(15, 11)
-  yield ('EciesAeadHkdfPrivateKey(%s,%s,%s,AesEaxKey(15,11))' %
-         (common_pb2.EllipticCurveType.Name(curve_type),
-          common_pb2.EcPointFormat.Name(ec_point_format),
-          common_pb2.HashType.Name(hash_type)),
-         hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
-             curve_type, ec_point_format, hash_type, dem_key_template))
+  yield (
+      f'EciesAeadHkdfPrivateKey({common_pb2.EllipticCurveType.Name(curve_type)},{common_pb2.EcPointFormat.Name(ec_point_format)},{common_pb2.HashType.Name(hash_type)},AesEaxKey(15,11))',
+      hybrid.hybrid_key_templates.create_ecies_aead_hkdf_key_template(
+          curve_type, ec_point_format, hash_type, dem_key_template),
+  )
 
 
 def ecdsa_test_cases() -> TestCasesType:
-  for hash_type in HASH_TYPES:
-    for curve_type in CURVE_TYPES:
-      for signature_encoding in SIGNATURE_ENCODINGS:
-        yield ('EcdsaPrivateKey(%s,%s,%s)' %
-               (common_pb2.HashType.Name(hash_type),
-                common_pb2.EllipticCurveType.Name(curve_type),
-                ecdsa_pb2.EcdsaSignatureEncoding.Name(signature_encoding)),
-               signature.signature_key_templates.create_ecdsa_key_template(
-                   hash_type, curve_type, signature_encoding))
+  for hash_type, curve_type, signature_encoding in itertools.product(HASH_TYPES, CURVE_TYPES, SIGNATURE_ENCODINGS):
+    yield (
+        f'EcdsaPrivateKey({common_pb2.HashType.Name(hash_type)},{common_pb2.EllipticCurveType.Name(curve_type)},{ecdsa_pb2.EcdsaSignatureEncoding.Name(signature_encoding)})',
+        signature.signature_key_templates.create_ecdsa_key_template(
+            hash_type, curve_type, signature_encoding),
+    )
 
 
 def rsa_ssa_pkcs1_test_cases() -> TestCasesType:
@@ -258,16 +251,16 @@ def rsa_ssa_pkcs1_test_cases() -> TestCasesType:
            (common_pb2.HashType.Name(hash_type), modulus_size,
             public_exponent),
            gen(hash_type, modulus_size, public_exponent))
+  public_exponent = 65537
   for modulus_size in [0, 2000, 3072, 4096]:
     hash_type = common_pb2.SHA256
-    public_exponent = 65537
     yield ('RsaSsaPkcs1PrivateKey(%s,%d,%d)' %
            (common_pb2.HashType.Name(hash_type), modulus_size,
             public_exponent),
            gen(hash_type, modulus_size, public_exponent))
+  modulus_size = 2048
   for public_exponent in [0, 1, 2, 3, 65536, 65537, 65538]:
     hash_type = common_pb2.SHA256
-    modulus_size = 2048
     yield ('RsaSsaPkcs1PrivateKey(%s,%d,%d)' %
            (common_pb2.HashType.Name(hash_type), modulus_size,
             public_exponent),
@@ -286,20 +279,20 @@ def rsa_ssa_pss_test_cases() -> TestCasesType:
             public_exponent),
            gen(hash_type, hash_type, salt_length, modulus_size,
                public_exponent))
+  modulus_size = 2048
+  public_exponent = 65537
   for salt_length in [-3, 0, 1, 16, 64]:
     hash_type = common_pb2.SHA256
-    modulus_size = 2048
-    public_exponent = 65537
     yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
            (common_pb2.HashType.Name(hash_type),
             common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
             public_exponent),
            gen(hash_type, hash_type, salt_length, modulus_size,
                public_exponent))
+  public_exponent = 65537
+  salt_length = 32
   for modulus_size in [0, 2000, 3072, 4096]:
     hash_type = common_pb2.SHA256
-    salt_length = 32
-    public_exponent = 65537
     yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
            (common_pb2.HashType.Name(hash_type),
             common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
@@ -318,10 +311,10 @@ def rsa_ssa_pss_test_cases() -> TestCasesType:
          gen(hash_type1, hash_type2, salt_length, modulus_size,
              public_exponent))
 
+  salt_length = 32
+  modulus_size = 2048
   for public_exponent in [0, 1, 2, 3, 65536, 65537, 65538]:
     hash_type = common_pb2.SHA256
-    salt_length = 32
-    modulus_size = 2048
     yield ('RsaSsaPssPrivateKey(%s,%s,%d,%d,%d)' %
            (common_pb2.HashType.Name(hash_type),
             common_pb2.HashType.Name(hash_type), salt_length, modulus_size,
@@ -371,21 +364,19 @@ class KeyGenerationConsistencyTest(parameterized.TestCase):
         if (name, lang) in SUCCEEDS_BUT_SHOULD_FAIL:
           failures += 1
         if (name, lang) in FAILS_BUT_SHOULD_SUCCEED:
-          self.fail('(%s, %s) succeeded, but is in FAILS_BUT_SHOULD_SUCCEED' %
-                    (name, lang))
+          self.fail(f'({name}, {lang}) succeeded, but is in FAILS_BUT_SHOULD_SUCCEED')
         results[lang] = 'success'
       except tink.TinkError as e:
         if (name, lang) not in FAILS_BUT_SHOULD_SUCCEED:
           failures += 1
         if (name, lang) in SUCCEEDS_BUT_SHOULD_FAIL:
           self.fail(
-              '(%s, %s) is in SUCCEEDS_BUT_SHOULD_FAIL, but failed with %s' %
-              (name, lang, e))
+              f'({name}, {lang}) is in SUCCEEDS_BUT_SHOULD_FAIL, but failed with {e}'
+          )
         results[lang] = e
     # Test that either all supported langs accept the template, or all reject.
     if failures not in [0, len(supported_langs)]:
-      self.fail('key generation for template %s is inconsistent: %s' %
-                (name, results))
+      self.fail(f'key generation for template {name} is inconsistent: {results}')
 
 
 if __name__ == '__main__':

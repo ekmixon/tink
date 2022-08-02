@@ -118,8 +118,8 @@ def decrypt_file(input_file: BinaryIO, output_file: BinaryIO,
 def main(argv):
   del argv
 
-  associated_data = b'' if not FLAGS.associated_data else bytes(
-      FLAGS.associated_data, 'utf-8')
+  associated_data = (bytes(FLAGS.associated_data, 'utf-8')
+                     if FLAGS.associated_data else b'')
 
   # Initialise Tink.
   try:

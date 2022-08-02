@@ -19,8 +19,7 @@ from util import supported_key_types
 
 def all_key_template_names():
   for _, names in supported_key_types.KEY_TEMPLATE_NAMES.items():
-    for name in names:
-      yield name
+    yield from names
 
 
 class SupportedKeyTypesTest(absltest.TestCase):

@@ -31,12 +31,11 @@ def output_prefix(key: tink_pb2.Keyset.Key) -> bytes:
   """Generates the prefix for the outputs handled by the specified key."""
   if key.output_prefix_type == tink_pb2.TINK:
     return struct.pack('>cL', TINK_START_BYTE, key.key_id)
-  elif (key.output_prefix_type == tink_pb2.CRUNCHY or
-        key.output_prefix_type == tink_pb2.LEGACY):
+  elif key.output_prefix_type in [tink_pb2.CRUNCHY, tink_pb2.LEGACY]:
     return struct.pack('>cL', LEGACY_START_BYTE, key.key_id)
   elif key.output_prefix_type == tink_pb2.RAW:
     return b''
   else:
     raise _tink_error.TinkError(
-        'The given key has invalid OutputPrefixType {}.'.format(
-            key.output_prefix_type))
+        f'The given key has invalid OutputPrefixType {key.output_prefix_type}.'
+    )

@@ -41,15 +41,13 @@ def tearDownModule():
 def all_jwt_mac_key_template_names() -> Iterable[str]:
   """Yields all JWT MAC key template names."""
   for key_type in supported_key_types.JWT_MAC_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
 
 
 def all_jwt_signature_key_template_names() -> Iterable[str]:
   """Yields all JWT signature key template names."""
   for key_type in supported_key_types.JWT_SIGNATURE_KEY_TYPES:
-    for key_template_name in supported_key_types.KEY_TEMPLATE_NAMES[key_type]:
-      yield key_template_name
+    yield from supported_key_types.KEY_TEMPLATE_NAMES[key_type]
 
 
 class JwtTest(parameterized.TestCase):
@@ -81,16 +79,10 @@ class JwtTest(parameterized.TestCase):
         verified_jwt = p2.verify_mac_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
       for p2 in unsupported_jwt_macs:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='%s supports verify_mac_and_decode with %s unexpectedly'
-            % (p2.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'{p2.lang} supports verify_mac_and_decode with {key_template_name} unexpectedly'):
           p2.verify_mac_and_decode(compact, validator)
     for p in unsupported_jwt_macs:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='%s supports compute_mac_and_encode with %s unexpectedly' %
-          (p.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'{p.lang} supports compute_mac_and_encode with {key_template_name} unexpectedly'):
         p.compute_mac_and_encode(raw_jwt)
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
@@ -132,16 +124,10 @@ class JwtTest(parameterized.TestCase):
         verified_jwt = verifier.verify_and_decode(compact, validator)
         self.assertEqual(verified_jwt.issuer(), 'issuer')
       for verifier in unsupported_verifiers:
-        with self.assertRaises(
-            tink.TinkError,
-            msg='%s supports jwt_public_key_verify with %s unexpectedly' %
-            (verifier.lang, key_template_name)):
+        with self.assertRaises(tink.TinkError, msg=f'{verifier.lang} supports jwt_public_key_verify with {key_template_name} unexpectedly'):
           verifier.verify_and_decode(compact, validator)
     for signer in unsupported_signers:
-      with self.assertRaises(
-          tink.TinkError,
-          msg='%s supports jwt_public_key_sign with %s unexpectedly' %
-          (signer.lang, key_template_name)):
+      with self.assertRaises(tink.TinkError, msg=f'{signer.lang} supports jwt_public_key_sign with {key_template_name} unexpectedly'):
         _ = signer.sign_and_encode(raw_jwt)
 
   @parameterized.parameters(all_jwt_signature_key_template_names())
@@ -177,16 +163,13 @@ class JwtTest(parameterized.TestCase):
         # have different values.
         jwks = json.loads(public_jwk_set)
         has_kid = 'kid' in jwks['keys'][0]
+        # Change the "kid" property of the JWK.
+        jwks['keys'][0]['kid'] = 'unknown kid'
+        public_keyset = testing_servers.jwk_set_to_keyset(
+            lang2, json.dumps(jwks))
+        verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
         if has_kid:
-          # Change the "kid" property of the JWK.
-          jwks['keys'][0]['kid'] = 'unknown kid'
-          public_keyset = testing_servers.jwk_set_to_keyset(
-              lang2, json.dumps(jwks))
-          verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
-          with self.assertRaises(
-              tink.TinkError,
-              msg='%s accepts tokens with an incorrect kid unexpectedly' %
-              lang2):
+          with self.assertRaises(tink.TinkError, msg=f'{lang2} accepts tokens with an incorrect kid unexpectedly'):
             verifier.verify_and_decode(compact, validator)
 
           # Remove the "kid" property of the JWK.
@@ -194,16 +177,8 @@ class JwtTest(parameterized.TestCase):
           public_keyset = testing_servers.jwk_set_to_keyset(
               lang2, json.dumps(jwks))
           verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
-          verified_jwt = verifier.verify_and_decode(compact, validator)
-          self.assertEqual(verified_jwt.issuer(), 'issuer')
-        else:
-          # Add a "kid" property of the JWK.
-          jwks['keys'][0]['kid'] = 'unknown kid'
-          public_keyset = testing_servers.jwk_set_to_keyset(
-              lang2, json.dumps(jwks))
-          verifier = testing_servers.jwt_public_key_verify(lang2, public_keyset)
-          verified_jwt = verifier.verify_and_decode(compact, validator)
-          self.assertEqual(verified_jwt.issuer(), 'issuer')
+        verified_jwt = verifier.verify_and_decode(compact, validator)
+        self.assertEqual(verified_jwt.issuer(), 'issuer')
 
 if __name__ == '__main__':
   absltest.main()
